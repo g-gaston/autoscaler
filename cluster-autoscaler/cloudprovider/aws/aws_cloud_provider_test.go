@@ -251,6 +251,20 @@ func TestNodeGroupForNodeWithNoProviderId(t *testing.T) {
 	assert.Equal(t, group, nil)
 }
 
+func TestNodeGroupForNodeWithHybridNode(t *testing.T) {
+	hybridNode := &apiv1.Node{
+		Spec: apiv1.NodeSpec{
+			ProviderID: "eks-hybrid:///us-west-2/my-cluster/my-node-1",
+		},
+	}
+	a := &autoScalingMock{}
+	provider := testProvider(t, newTestAwsManagerWithAsgs(t, a, nil, []string{"1:5:test-asg"}))
+	group, err := provider.NodeGroupForNode(hybridNode)
+
+	assert.NoError(t, err)
+	assert.Nil(t, group)
+}
+
 func TestAwsRefFromProviderId(t *testing.T) {
 	tests := []struct {
 		provID string

@@ -115,6 +115,13 @@ func (aws *awsCloudProvider) NodeGroupForNode(node *apiv1.Node) (cloudprovider.N
 		klog.Warningf("Node %v has no providerId", node.Name)
 		return nil, nil
 	}
+
+	// Hybrid nodes are not backed by AWS infrastructure and are not managed by autoscaler
+	if strings.HasPrefix(node.Spec.ProviderID, "eks-hybrid:///") {
+		klog.V(4).Infof("Node %v is a hybrid node", node.Name)
+		return nil, nil
+	}
+
 	ref, err := AwsRefFromProviderId(node.Spec.ProviderID)
 	if err != nil {
 		return nil, err
